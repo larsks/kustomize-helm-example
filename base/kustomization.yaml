@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: external-secrets
+
+helmCharts:
+  - name: kubernetes-external-secrets
+    namespace: external-secrets
+    includeCRDs: true
+    valuesInline:
+      serviceMonitor:
+        enabled: true
+    releaseName: oddbit
+    version: 8.3.0
+    repo: https://external-secrets.github.io/kubernetes-external-secrets/
+
+# Q: Why are you patching things here instead of in the overlay?
+# A: Because the changes here are ones I would want in all cases, but
+#    I don't want to directly edit the output of `helm template`.
+patches:
+  - target:
+      kind: Deployment
+      name: oddbit-kubernetes-external-secrets
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: oddbit-kubernetes-external-secrets
+      spec:
+        template:
+          spec:
+            containers:
+              - name: kubernetes-external-secrets
+                env:
+                  - $patch: delete
+                envFrom:
+                  - secretRef:
+                      name: aws-credentials
+                  - configMap:
+                      name: external-secrets-config
