@@ -5,6 +5,11 @@ resources:
   - ../../base
 
 configMapGenerator:
+  #  By setting 'behavior: merge', we override just the
+  #  keys declared in our local config.env while 
+  #  preserving any other values in the base ConfigMap
+  #  of the same name.
   - name: external-secrets-config
+    behavior: merge
     envs:
       - config.env
