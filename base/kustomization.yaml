@@ -40,5 +40,5 @@ patches:
                 envFrom:
                   - secretRef:
                       name: aws-credentials
-                  - configMap:
+                  - configMapRef:
                       name: external-secrets-config
